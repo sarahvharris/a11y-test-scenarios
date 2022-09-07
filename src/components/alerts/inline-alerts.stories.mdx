@@ -1,6 +1,6 @@
 import { Canvas, Meta, Story } from '@storybook/addon-docs';
 
-<Meta title="Alerts/Inline Alerts" />
+<Meta title="Components/Inline Alert" />
 
 # Inline Alerts
 
@@ -123,7 +123,7 @@ This example has error handling being done on text `input`. To enable error, sta
         e.preventDefault();
       }}
     >
-      <label for="firstNameInput3" class="example-spacer--one">
+      <label htmlFor="firstNameInput3" className="example-spacer--one">
         First name
       </label>
       <input
@@ -138,7 +138,7 @@ This example has error handling being done on text `input`. To enable error, sta
         aria-atomic="true"
         style={{ color: 'red' }}
       ></span>
-      <label for="lastNameInput3" class="example-spacer--one">
+      <label htmlFor="lastNameInput3" className="example-spacer--one">
         Last name
       </label>
       <input
@@ -153,7 +153,7 @@ This example has error handling being done on text `input`. To enable error, sta
         aria-atomic="true"
         style={{ color: 'red' }}
       ></span>
-      <button class="example-spacer--one">Submit</button>
+      <button className="example-spacer--one">Submit</button>
     </form>
   </Story>
 </Canvas>
