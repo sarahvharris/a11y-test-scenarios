@@ -1,0 +1,43 @@
+{
+  "name": "a11y-test-scenarios",
+  "version": "1.0.0",
+  "description": "A storybook for different technical accessibility test cases",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "storybook": "start-storybook -p 6006",
+    "build": "build-storybook"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sarahvharris/a11y-test-scenarios.git"
+  },
+  "keywords": [
+    "a11y",
+    "accessibility",
+    "storybook"
+  ],
+  "author": "Sarah Harris",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sarahvharris/a11y-test-scenarios/issues"
+  },
+  "homepage": "https://github.com/sarahvharris/a11y-test-scenarios#readme",
+  "devDependencies": {
+    "@babel/core": "^7.19.0",
+    "@storybook/addon-actions": "^6.5.10",
+    "@storybook/addon-docs": "^6.5.10",
+    "@storybook/addon-essentials": "^6.5.10",
+    "@storybook/addon-interactions": "^6.5.10",
+    "@storybook/addon-links": "^6.5.10",
+    "@storybook/builder-webpack4": "^6.5.10",
+    "@storybook/react": "^6.5.10",
+    "@storybook/manager-webpack4": "^6.5.10",
+    "@storybook/testing-library": "0.0.13",
+    "babel-loader": "^8.2.5"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}

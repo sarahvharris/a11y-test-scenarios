@@ -1,0 +1,226 @@
+import { Canvas, Meta, Story } from '@storybook/addon-docs';
+
+<Meta title="Alerts/Alerts" />
+
+# Alerts
+
+Test scenarios for messaging and the different ways of alerting users when one gets added to a page
+
+## TL;DR
+
+- Alerts (banners, alerts, etc.) work best when they are added to an `aria-live` section that is on the DOM on page load. You can add `display: none` to the alerts themselves but avoid adding it to the element that has `aria-live`
+- `role="alert"` seems to read out fine in all screen readers but you want to avoid using too many in a single experience
+- `role="status"` still seems to lack support in NVDA + FireFox
+
+## Alert vs status `role`
+
+Depending on the use case, a `role="status"` may need to be used over role="alert" (and vice versa). This test shows the difference in utilizing one over the other.
+
+export const showMessage = (messageId) => {
+  document.getElementById(messageId).style.display = 'block';
+};
+
+export const generateStatusMessage = () => {
+  const messageWrapper = document.getElementById('messageWrapper');
+  const messageEl = document.createElement('div');
+  messageEl.innerText = 'This message is `role="status"`';
+  messageEl.setAttribute('role', 'status');
+  messageWrapper.appendChild(messageEl);
+};
+
+export const generateAlertMessage = () => {
+  const messageWrapper = document.getElementById('messageWrapper');
+  const messageEl = document.createElement('div');
+  messageEl.innerText = 'This message is `role="alert"`';
+  messageEl.setAttribute('role', 'alert');
+  messageWrapper.appendChild(messageEl);
+};
+
+<Canvas>
+  <Story name="Alert vs status `role`">
+    <div id="statusMessage" role="status" style={{ display: 'none' }}>
+      This message is `role="status"`
+    </div>
+    <div id="alertMessage" role="alert" style={{ display: 'none' }}>
+      This message is `role="alert"`
+    </div>
+    <button
+      onClick={() => {
+        showMessage('statusMessage');
+      }}
+      className="example-inset--one"
+    >
+      trigger status message
+    </button>
+    <button
+      onClick={() => {
+        showMessage('alertMessage');
+      }}
+      className="example-inset--one"
+    >
+      trigger alert message
+    </button>
+    <button
+      onClick={() => {
+        showMessage('statusMessage');
+        showMessage('alertMessage');
+      }}
+    >
+      trigger both messages
+    </button>
+  </Story>
+</Canvas>
+
+| Test case          | Result                                                                                                                                                                                                              |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| VoiceOver + Safari | `role="status"` message read out appropriately; `role="alert"` read out appropriately; If multiple messages are triggered at the same time, the role=alert will read over `role="status"`                           |
+| NVDA + Firefox     | `role="status"` message does not get read out when button is clicked; `role="alert"` read out appropriately; If multiple messages are triggered at the same time, the `role="alert"` will read over `role="status"` |
+| JAWS + Chrome      | `role="status"` message read out appropriately; `role="alert"` read out appropriately; If multiple messages are triggered at the same time, it will read the alert ones first and then status                       |
+| A11y tree          | `role="status"` have a "status" type and `role="alert"` have a "role" type; both have `atomic: true`                                                                                                                |
+
+## Alert vs status role, added dynamically
+
+The following messages are created dynamically and not hidden by CSS:
+
+<Canvas>
+  <Story name="Alert vs status `role`, added dynamically">
+    <div id="messageWrapper"></div>
+    <button
+      onClick={() => {
+        generateStatusMessage();
+      }}
+      className="example-inset--one"
+    >
+      create status message
+    </button>
+    <button
+      onClick={() => {
+        generateAlertMessage();
+      }}
+      className="example-inset--one"
+    >
+      create alert message
+    </button>
+  </Story>
+</Canvas>
+
+| Test case          | Result                                                                                                      |
+| ------------------ | ----------------------------------------------------------------------------------------------------------- |
+| VoiceOver + Safari | `role="status"` message read out appropriately; `role="alert"` read out appropriately                       |
+| NVDA + Firefox     | `role="status"` message does not get read out when button is clicked; `role="alert"` read out appropriately |
+| JAWS + Chrome      | `role="status"` message does not get read out when button is clicked; `role="alert"` read out appropriately |
+| A11y tree          | `role="status"` have a "status" type and `role="alert"` have a "role" type; both have `atomic: true`        |
+
+## Using `aria-live` and `aria-atomic` for message
+
+The `aria-live` and `aria-atomic` are added to a wrapper div, not the alert itself. The `div` with these ARIA attributes should not be hidden via CSS
+
+<Canvas>
+  <Story name="Using `aria-live` and `aria-atomic` for message">
+    <div aria-live="polite" aria-atomic="true">
+      <p id="statusMessage2" style={{ display: 'none' }}>
+        This message is a polite one
+      </p>
+    </div>
+    <div aria-live="assertive" aria-atomic="true">
+      <p id="alertMessage2" style={{ display: 'none' }}>
+        This message is an assertive one
+      </p>
+    </div>
+    <button
+      onClick={() => {
+        showMessage('statusMessage2');
+      }}
+      className="example-inset--one"
+    >
+      trigger polite message
+    </button>
+    <button
+      onClick={() => {
+        showMessage('alertMessage2');
+      }}
+      className="example-inset--one"
+    >
+      trigger assertive message
+    </button>
+    <button
+      onClick={() => {
+        showMessage('statusMessage2');
+        showMessage('alertMessage2');
+      }}
+    >
+      trigger both messages
+    </button>
+  </Story>
+</Canvas>
+
+| Test case          | Result                                                                                                                                                                                                                              |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| VoiceOver + Safari | `aria-live="polite"` message read out appropriately; `aria-live="assertive"` read out appropriately; If multiple messages are triggered at the same time, the `aria-live="assertive"` will read over `aria-live="polite"`           |
+| NVDA + Firefox     | `aria-live="polite"` message read out appropriately; `aria-live="assertive"` read out appropriately; If multiple messages are triggered at the same time, the `aria-live="assertive"` will read first and then `aria-live="polite"` |
+| JAWS + Chrome      | `aria-live="polite"` message read out appropriately; `aria-live="assertive"` read out appropriately; If multiple messages are triggered at the same time, the `aria-live="assertive"` will read first and then `aria-live="polite"` |
+| A11y tree          | `aria-live="polite"` and `aria-live="assertive"` both listed as "generic" with `atomic: true`                                                                                                                                       |
+
+## Group of alerts
+
+If there are multiple messages that need to be alerted to the user, test having an `aria-live` space with multiple messages:
+
+<Canvas>
+  <Story name="group of alerts">
+    <div aria-live="polite" aria-atomic="true">
+      <div id="groupMessages" style={{ display: 'none' }}>
+        <p>You have the following messages:</p>
+        <div>success: message one</div>
+        <div>info: message two</div>
+        <div>warning: message three</div>
+      </div>
+    </div>
+    <button
+      onClick={() => {
+        showMessage('groupMessages');
+      }}
+      className="example-spacer--one example-inset--one"
+    >
+      Trigger multiple alerts
+    </button>
+  </Story>
+</Canvas>
+
+| Test case          | Result                                                                                    |
+| ------------------ | ----------------------------------------------------------------------------------------- |
+| VoiceOver + Safari | On button click, all content within the `aria-live` group was read out                    |
+| NVDA + Firefox     | On button click, all content within the `aria-live` group was read out                    |
+| JAWS + Chrome      | On button click, all content within the `aria-live` group was read out                    |
+| A11y tree          | Wrapper `div` listed as "generic" and requires aria-atomic to be listed as `atomic: true` |
+
+## Group of alerts, using `role`
+
+This tests uses `role="alert` on the wrapper of the group of messages
+
+<Canvas>
+  <Story name="group of alerts, using `role`">
+    <div role="alert">
+      <div id="groupMessages2" style={{ display: 'none' }}>
+        <p>You have the following messages:</p>
+        <div>success: message one</div>
+        <div>info: message two</div>
+        <div>warning: message three</div>
+      </div>
+    </div>
+    <button
+      onClick={() => {
+        showMessage('groupMessages2');
+      }}
+      className="example-spacer--one example-inset--one"
+    >
+      Trigger multiple alerts
+    </button>
+  </Story>
+</Canvas>
+
+| Test case          | Result                                                                                                                                                            |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| VoiceOver + Safari | On button click, all content within the `role=alert` was read out (note: `role=alert` will take precedence over any `role=status` or `aria-live="polite"` spaces) |
+| NVDA + Firefox     | On button click, all content within the `role=alert` was read out (note: `role=alert` will take precedence over any `role=status` or `aria-live="polite"` spaces) |
+| JAWS + Chrome      | On button click, all content within the `role=alert` was read out (note: `role=alert` will take precedence over any `role=status` or `aria-live="polite"` spaces) |
+| A11y tree          | Wrapper listed as "alert" and has `atomic: true`                                                                                                                  |

@@ -1,0 +1,166 @@
+import { Canvas, Meta, Story } from '@storybook/addon-docs';
+
+<Meta title="Alerts/Inline Alerts" />
+
+# Inline Alerts
+
+Test scenarios for inline alerts, typically used during error handling within forms
+
+## TL;DR
+
+If a form element is invalid, add `aria-invalid="true"` and `aria-describedby` to it. The `aria-describedby` should be associated to the id of the error message
+
+## Using `aria-describedby`
+
+This test scenario utilizes `aria-describedby` when an error message appears for a specific form element
+
+export const fakeFormSubmit = (e, formPosition = '') => {
+  e.preventDefault();
+  console.log('fake data', e);
+  document.getElementById(`firstNameError${formPosition}`).style.display =
+    'block';
+  document.getElementById(`lastNameError${formPosition}`).style.display =
+    'block';
+  setTimeout(() => {
+    document.getElementById(`firstNameInput${formPosition}`).focus();
+  });
+};
+
+export const onInputErrorHandle = (e, errorId) => {
+  const inputVal = e.target.value;
+  const errorMessageEl = document.getElementById(errorId);
+  errorMessageEl.innerText = inputVal !== '' ? 'That name isnt great D:' : '';
+};
+
+<Canvas>
+  <Story name="using `aria-describedby`">
+    <form onSubmit={(e) => fakeFormSubmit(e)}>
+      <label htmlFor="firstNameInput" className="example-spacer--one">
+        First name
+      </label>
+      <input id="firstNameInput" />
+      <div
+        id="firstNameError"
+        className="example-spacer--one"
+        style={{ color: 'red', display: 'none' }}
+      >
+        must enter a first name
+      </div>
+      <label htmlFor="lastNameInput" className="example-spacer--one">
+        Last name
+      </label>
+      <input id="lastNameInput" />
+      <div
+        id="lastNameError"
+        className="example-spacer--one"
+        style={{ color: 'red', display: 'none' }}
+      >
+        must enter a last name
+      </div>
+      <button className="example-spacer--one">Submit</button>
+    </form>
+  </Story>
+</Canvas>
+
+| Test case          | Result                                                                                                                                                                                                                             |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| VoiceOver + Safari | First name gets read out as an invalid input and then reads out error message; Last name does not get read out until focus into that input                                                                                         |
+| NVDA + Firefox     | First name gets read out as an invalid input and then reads out error message; Last name does not get read out until focus into that input                                                                                         |
+| JAWS + Chrome      | First name gets read out as an invalid input and then reads out error message (however it does it twice, once on focus and then once after reading out editable text); Last name does not get read out until focus into that input |
+| A11y tree          | Inputs on error do not have any distinguishable difference on a11y tree (no indication of error even with `aria-invalid=true`)                                                                                                     |
+
+## Using role="alert"
+
+Adding a `role="alert"` to the inline alerts on form submission
+
+<Canvas>
+  <Story name="using `role=alert`">
+    <form onSubmit={(e) => fakeFormSubmit(e, '2')}>
+      <label htmlFor="firstNameInput2" className="example-spacer--one">
+        First name
+      </label>
+      <input id="firstNameInput2" />
+      <div
+        id="firstNameError2"
+        role="alert"
+        className="example-spacer--one"
+        style={{ color: 'red', display: 'none' }}
+      >
+        must enter a first name
+      </div>
+      <label htmlFor="lastNameInput2" className="example-spacer--one">
+        Last name
+      </label>
+      <input id="lastNameInput2" />
+      <div
+        id="lastNameError2"
+        role="alert"
+        className="example-spacer--one"
+        style={{ color: 'red', display: 'none' }}
+      >
+        must enter a last name
+      </div>
+      <button className="example-spacer--one">Submit</button>
+    </form>
+  </Story>
+</Canvas>
+
+| Test case          | Result                                                                                                                                                                                    |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| VoiceOver + Safari | Because both inputs use a `role=alert` only one gets read out which in this case is the last name. This could be confusing to a SR user seeing they get focused into the first name input |
+| NVDA + Firefox     | Both errors get read out and then reads out that focus is in first name input, this could get annoying if there are multiple errors within a form                                         |
+| JAWS + Chrome      | Both errors get read out on focus of first name input; first name input error gets read out twice                                                                                         |
+| A11y tree          | Inputs on error do not have any distinguishable difference on a11y tree (no indication of error even with `aria-invalid=true`); errors listed as "alert"                                  |
+
+## Live error handling
+
+This example has error handling being done on text `input`. To enable error, start typing into either input
+
+<Canvas>
+  <Story name="live error handling">
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+      }}
+    >
+      <label for="firstNameInput3" class="example-spacer--one">
+        First name
+      </label>
+      <input
+        onInput={(e) => {
+          onInputErrorHandle(e, 'firstNameError3');
+        }}
+        id="firstNameInput3"
+      />
+      <span
+        id="firstNameError3"
+        aria-live="polite"
+        aria-atomic="true"
+        style={{ color: 'red' }}
+      ></span>
+      <label for="lastNameInput3" class="example-spacer--one">
+        Last name
+      </label>
+      <input
+        onInput={(e) => {
+          onInputErrorHandle(e, 'lastNameError3');
+        }}
+        id="lastNameInput3"
+      />
+      <span
+        id="lastNameError3"
+        aria-live="polite"
+        aria-atomic="true"
+        style={{ color: 'red' }}
+      ></span>
+      <button class="example-spacer--one">Submit</button>
+    </form>
+  </Story>
+</Canvas>
+
+| Test case          | Result                                                                                                                                                                             |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| VoiceOver + Safari | Inline alert will read out on first instance of error in the input                                                                                                                 |
+| NVDA + Firefox     | Inline alert will be read out every time there is an input event (not great)                                                                                                       |
+| JAWS + Chrome      | Inline alert will read out on first instance of error in the input                                                                                                                 |
+| A11y tree          | Inputs on error do not have any distinguishable difference on a11y tree (no indication of error even with `aria-invalid=true`); errors listed as "generic" but have `atomic: true` |
