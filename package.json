@@ -1,23 +1,24 @@
 {
   "name": "a11y-test-scenarios",
   "version": "1.0.0",
+  "private": true,
   "description": "A storybook for different technical accessibility test cases",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "storybook": "start-storybook -p 6006",
-    "build": "build-storybook"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/sarahvharris/a11y-test-scenarios.git"
-  },
+  "author": "Sarah Harris",
   "keywords": [
     "a11y",
     "accessibility",
     "storybook"
   ],
-  "author": "Sarah Harris",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "start-storybook -p 6006",
+    "build": "build-storybook",
+    "postinstall": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sarahvharris/a11y-test-scenarios.git"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/sarahvharris/a11y-test-scenarios/issues"
