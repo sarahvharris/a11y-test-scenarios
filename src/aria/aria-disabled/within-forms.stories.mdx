@@ -1,0 +1,186 @@
+import { Canvas, Meta, Story } from '@storybook/addon-docs';
+
+<Meta title="ARIA/aria-disabled/Within forms" />
+
+# Within forms
+
+Test scenarios that determine which outputs better results for screen readers:`aria-disabled` or `disabled` for form elements.
+
+Results may differ based on the element (e.g., `<input>` vs `<button>`).
+
+**For all examples, inspect console to see what data gets "submitted" on form submission**
+
+## TL;DR
+
+Based on the findings below, when determining to use `disabled` or`aria-disabled`, it really depends on the use case.
+
+- Within forms, you do not need to use `disabled` and`aria-disabled`; its one or the other depending on the use case
+- `aria-disabled` sets `disabled=true` on the a11y tree for the element and its children, allows to focus the element (via tab), but it does not set styles or JS to disable click/pointer events
+- `disabled` sets `disabled=true` on the a11y tree for the element, disables focus, adds 'disabled' styles, and disables click/pointer events
+- `disabled` will take precedence over `aria-disabled`
+- Buttons, in most cases, should use `aria-disabled` instead of `disabled` (especially in forms, better usability imo)
+- It is also worth mentioning that if you can prevent using `disabled` elements to begin with, that's the better route (e.g., if "Middle name" is `disabled`, place text instead of a form element)
+
+export const fakeFormSubmission = (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  console.log(Object.fromEntries(formData.entries()));
+};
+
+## `disabled` elements
+
+Specific elements within the example below utilize `disabled` attributes
+
+<Canvas>
+  <Story name="`disabled` elements">
+    <form onSubmit={fakeFormSubmission}>
+      <fieldset>
+        <legend>Full name</legend>
+        <label className="example-inset--one">
+          First name
+          <input name="firstName" />
+        </label>
+        <label className="example-inset--one">
+          Middle name
+          <input disabled placeholder="Bob" name="middleName" />
+        </label>
+        <label>
+          Last name
+          <input name="lastName" />
+        </label>
+      </fieldset>
+      <div className="example-spacer--one">
+        <label>
+          marital status
+          <select id="maritalStatus" name="maritalStatus">
+            <option disabled>Married</option>
+            <option disabled>Single</option>
+            <option>Dont need nobody</option>
+            <option>Other</option>
+          </select>
+        </label>
+      </div>
+      <div className="example-spacer--one">
+        <label>
+          Select your favorite cake flavor
+          <select name="cakeFlavor" disabled>
+            <option>Chocolate</option>
+            <option>Vanilla</option>
+          </select>
+        </label>
+      </div>
+      <fieldset className="example-spacer--one">
+        <legend>Select an option:</legend>
+        <div>
+          <label>
+            <input disabled type="radio" name="radioFieldset" value="1" />
+            Option 1
+          </label>
+        </div>
+        <div className="example-spacer--one">
+          <label>
+            <input type="radio" name="radioFieldset" value="2" />
+            Option 2
+          </label>
+        </div>
+      </fieldset>
+      <button className="example-spacer--one">submit</button>
+    </form>
+  </Story>
+</Canvas>
+
+| Test case          | Result                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| VoiceOver + Safari | - Middle name input and label not read out when tabbing; arrow navigation will allow middle name to be called out <br />- If a placeholder name is added to middle name, it will be read out on arrow nav <br />- Options in marital status can be navigated to via keyboard arrows even when disabled <br />- Cake flavor select is skipped over on tab but can be accessed via arrow nav <br />- Radio buttons option 1 gets skipped over via tab but second radio reads out that it is "2 of 2" <br />- On rotor all form elements are listed even when disabled (listed as 'dimmed')                                                                                                                                                                                              |
+| NVDA + Firefox     | - Middle name input and label not read out when tabbing; arrow navigation will allow middle name to be called out <br />- Placeholder within middle name input is not read out on arrow navigation <br />- Options in marital status cannot be navigated to via keyboard arrows (user cannot access) <br />- Cake flavor select is skipped over on tab but can be accessed via arrow nav <br />- Radio buttons option 1 gets skipped over via tab but second radio reads out that it is "2 of 2" <br />- Form fields elements list shows all form elements, including disabled ones as 'unavailable'                                                                                                                                                                                  |
+| JAWS + Chrome      | - Middle name input and label not read out when tabbing; arrow navigation will allow middle name to be called out <br/>- If a placeholder name is added to middle name, it will be read out on arrow nav <br />- Options in marital status cannot be navigated to via keyboard arrows (user cannot access) <br />- Cake flavor select is skipped over on tab but can be accessed via arrow nav <br />- Radio buttons option 1 gets skipped over via tab but second radio reads out that it is "2 of 2" <br />- Radio buttons list shows both options and disabled one as 'unavailable' <br />- Edit Box list shows all inputs in full name and middle name is listed 'unavailable' <br />- Form Fields list shows all form elements and disabled elements are listed as 'unavailable' |
+| A11y tree          | `disabled` lists element as `disabled=true` on the a11y tree but focusable is not listed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| General navigation | `disabled` elements cannot be tabbed into; clicking a label to a disabled element will not focus it                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Form submission    | Values that are `disabled` do not get submitted                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Other              | `disabled` takes precedence over `readonly` and `aria-disabled`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+
+## `aria-disabled` elements
+
+Specific elements within the example below utilize `aria-disabled` attributes
+
+<Canvas>
+  <Story name="`aria-disabled` elements">
+    <form onSubmit={fakeFormSubmission}>
+      <fieldset>
+        <legend>Full name</legend>
+        <label className="example-inset--one">
+          First name
+          <input name="firstName" />
+        </label>
+        <label className="example-inset--one">
+          Middle name
+          <input aria-disabled="true" placeholder="Bob" name="middleName" />
+        </label>
+        <label>
+          Last name
+          <input name="lastName" />
+        </label>
+      </fieldset>
+      <div className="example-spacer--one">
+        <label>
+          marital status
+          <select id="maritalStatus" name="maritalStatus">
+            <option aria-disabled="true">Married</option>
+            <option aria-disabled="true">Single</option>
+            <option>Dont need nobody</option>
+            <option>Other</option>
+          </select>
+        </label>
+      </div>
+      <div className="example-spacer--one">
+        <label>
+          Select your favorite cake flavor
+          <select name="cakeFlavor" aria-disabled="true">
+            <option>Chocolate</option>
+            <option>Vanilla</option>
+          </select>
+        </label>
+      </div>
+      <fieldset className="example-spacer--one">
+        <legend>Select an option:</legend>
+        <div>
+          <label>
+            <input
+              aria-disabled="true"
+              type="radio"
+              name="radioFieldset"
+              value="1"
+            />
+            Option 1
+          </label>
+        </div>
+        <div className="example-spacer--one">
+          <label>
+            <input type="radio" name="radioFieldset" value="2" />
+            Option 2
+          </label>
+        </div>
+      </fieldset>
+      <button className="example-spacer--one">submit</button>
+    </form>
+  </Story>
+</Canvas>
+
+| Test case          | Result                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| VoiceOver + Safari | - Middle name input and label read out when tabbing and arrow nav, announced as 'dimmed' <br />- If a placeholder name is added to middle name, it will be read out <br />- Options in marital status can be navigated to via keyboard arrows even when aria-disabled is set <br />- Cake flavor select is read on tab (listed as 'dimmed') and can be accessed via arrow nav <br />- Radio buttons option 1 and 2 get read via tabbing into the group and arrow nav <br />- On rotor all form elements are listed even when aria-disabled is set (aria-disabled listed as 'dimmed')                                                                                                                                                                                                                                                                                                     |
+| NVDA + Firefox     | - Middle name input and label read out when tabbing and arrow nav, announced as 'unavailable' <br />- If placeholder name is added to middle name, it will read it out on focus but not via arrow nav <br />- Options in marital status can be navigated to and does not read out as 'unavailable' (acts like they are viable options) <br />- Cake flavor select lists as 'unavailable' but you can still open and select options <br />- Radio buttons options 1 and 2 get read out via tabbing into the group and arrow nav; you can select both options <br />- Form fields elements list has all form elements and lists aria-disabled as 'unavailable'                                                                                                                                                                                                                             |
+| JAWS + Chrome      | - Middle name input and label read out when tabbing and arrow nav, announced as 'unavailable' <br />- If placeholder name is added to middle name, it will be read out <br />- Options in marital status can be navigated to; aria-disabled options read as 'unavailable' but you can still navigate/select them <br />- Cake flavor selects lists as 'unavailable' but you can still open and select options <br />- Radio options 1 and 2 get read out via tabbing into the group and arrow nav; you can select both options (aria-disabled options reads a 'unavailable') <br />- Edit box list shows all inputs in full name and middle name is listed as 'unavailable' <br />- Radio buttons list both options and has aria-disabled option listed as 'unavailable' <br />- Form field list has all form elements listed and has all aria-disabled elements listed as 'unavailable' |
+| A11y tree          | `aria-disabled` will list the form elements as `disabled=true` on the a11y tree; `focusable=true` is also present when using `aria-disabled`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| General navigation | All elements can be navigated and focused into when `aria-disabled` is used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Form submission    | Values that are `aria-disabled` get submitted; `aria-disabled` may be difficult to use if utilizing external library (e.g., Formik) that checks for 'disabled' vs custom means (e.g., `aria-disabled`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Other              | Additional code would be needed to check if `aria-disabled` is on element as well as JS to disable click events and CSS to give a 'disabled' appearance                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+
+## `disabled` and `aria-disabled`
+
+`aria-disabled` is a subset of all the things `disabled` does. `disabled` will take precedence and make the form elements not focusable
+
+## Resources
+
+- [W3C aria-disabled usage](https://www.w3.org/TR/wai-aria-1.0/states_and_properties#aria-disabled)
+- [MDN aria-disabled](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-disabled)

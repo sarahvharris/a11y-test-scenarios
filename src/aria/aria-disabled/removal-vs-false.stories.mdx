@@ -1,0 +1,202 @@
+import { Canvas, Meta, Story } from '@storybook/addon-docs';
+
+<Meta title="ARIA/aria-disabled/DOM Removal vs `aria-disabled=false`" />
+
+# DOM removal vs `aria-disabled="false"`
+
+Test scenarios that determine which outputs better results for screen readers: `aria-disabled="false"` or removing the attribute off the DOM.
+
+**In each section, first example uses `aria-disabled="false"` and second removes `aria-disabled` off the form element.**
+
+## TL;DR
+
+Based on the findings below, it seems like there is not much difference between `aria-disabled="false"` and removing the attribute off the DOM (minus less clutter on the element)
+
+## Buttons
+
+<Canvas>
+  <Story name="Buttons">
+    <button aria-disabled="false">Submit</button>
+    <button className="example-spacer--one">Submit</button>
+  </Story>
+</Canvas>
+
+| Test case          | Result                                                                                                     |
+| ------------------ | ---------------------------------------------------------------------------------------------------------- |
+| VoiceOver + Safari | No distinguishable difference between the two; both appear in the Rotor "form controls" with the same text |
+| NVDA + Firefox     | No distinguishable difference between the two; both appear in the button elements list with the same text  |
+| JAWS + Chrome      | No distinguishable difference between the two; both appear the same in the buttons list                    |
+| A11y tree          | Both have the same structure                                                                               |
+| General navigation | Both buttons can be navigated to as expected                                                               |
+
+## Text inputs
+
+<Canvas>
+  <Story name="Text inputs">
+    <div>
+      <label>
+        First name
+        <input placeholder="Enter name" aria-disabled="false" />
+      </label>
+    </div>
+    <div className="example-spacer--one">
+      <label>
+        First name
+        <input placeholder="Enter name" />
+      </label>
+    </div>
+  </Story>
+</Canvas>
+
+| Test case          | Result                                                                                                          |
+| ------------------ | --------------------------------------------------------------------------------------------------------------- |
+| VoiceOver + Safari | No distinguishable difference between the two; both appear in the Rotor "form controls" with the same text      |
+| NVDA + Firefox     | No distinguishable difference between the two; both appear in the form fields elements list with the same text  |
+| JAWS + Chrome      | No distinguishable difference between the two; both appear in the form fields and edit test list with same text |
+| A11y tree          | Both have the same structure                                                                                    |
+| General navigation | Both inputs can be navigated to as expected                                                                     |
+
+## Radio buttons
+
+<Canvas>
+  <Story name="Radio buttons">
+    <fieldset>
+      <legend>Select an option:</legend>
+      <div>
+        <label>
+          <input
+            aria-disabled="false"
+            type="radio"
+            name="radioFieldset"
+            value="1"
+          />
+          Option 1
+        </label>
+      </div>
+      <div className="example-spacer--one">
+        <label>
+          <input type="radio" name="radioFieldset" value="2" />
+          Option 2
+        </label>
+      </div>
+    </fieldset>
+  </Story>
+</Canvas>
+
+| Test case          | Result                                                                                                                                                                             |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| VoiceOver + Safari | No distinguishable difference between the two; both appear in the Rotor "form controls" with the same text; The readout is the same when the radio buttons are selected            |
+| NVDA + Firefox     | No distinguishable difference between the two; both appear in the form fields elements list with the same text; The readout is the same when radio buttons are selected/unselected |
+| JAWS + Chrome      | No distinguishable difference between the two; both appear in the radio buttons list with the same text; The readout is the same when radio buttons are selected/unselected        |
+| A11y tree          | Both have the same structure when selected and unselected                                                                                                                          |
+| General navigation | Both inputs can be navigated to as expected                                                                                                                                        |
+
+## Checkboxes
+
+<Canvas>
+  <Story name="Checkboxes">
+    <fieldset>
+      <legend>Select many options:</legend>
+      <div>
+        <label>
+          <input
+            aria-disabled="false"
+            type="checkbox"
+            name="checkboxFieldset"
+          />
+          Option 1
+        </label>
+      </div>
+      <div className="example-spacer--one">
+        <label>
+          <input type="checkbox" name="checkboxFieldset" />
+          Option 2
+        </label>
+      </div>
+    </fieldset>
+  </Story>
+</Canvas>
+
+| Test case          | Result                                                                                                                                                                           |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| VoiceOver + Safari | No distinguishable difference between the two; both appear in the Rotor "form controls" with the same text; The readout is the same when the checkboxes are checked              |
+| NVDA + Firefox     | No distinguishable difference between the two; both appear in the form fields elements list with the same text; The readout is the same when radio buttons are checked/unchecked |
+| JAWS + Chrome      | No distinguishable difference between the two; both appear in the checkbox list with the same text; The readout is the same when radio buttons are checked/unchecked             |
+| A11y tree          | Both have the same structure when checked and unchecked                                                                                                                          |
+| General navigation | Both inputs can be navigated to as expected                                                                                                                                      |
+
+## Selects
+
+<Canvas>
+  <Story name="Selects">
+    <div>
+      <label>
+        Choose an option:
+        <select aria-disabled="false">
+          <option value="">choose an option</option>
+          <option value="one">One</option>
+          <option value="two">Two</option>
+        </select>
+      </label>
+    </div>
+    <div className="example-spacer--one">
+      <label>
+        Choose an option:
+        <select>
+          <option value="">choose an option</option>
+          <option value="one">One</option>
+          <option value="two">Two</option>
+        </select>
+      </label>
+    </div>
+  </Story>
+</Canvas>
+
+| Test case          | Result                       |
+| ------------------ | ---------------------------- |
+| VoiceOver + Safari | TBD                          |
+| NVDA + Firefox     | TBD                          |
+| JAWS + Chrome      | TBD                          |
+| A11y tree          | Both have the same structure |
+| General navigation | TBD                          |
+
+## Change from disabled to enabled
+
+This will test what happens when a form elements goes from a disabled state to enabled
+
+export const enableInputs = () => {
+  document
+    .getElementById('changeInputDisabled1')
+    .setAttribute('aria-disabled', false);
+  document
+    .getElementById('changeInputDisabled2')
+    .removeAttribute('aria-disabled');
+};
+
+<Canvas>
+  <Story name="Change from disabled to enabled">
+    <div>
+      <label>
+        Input will change to `aria-disabled="false"`
+        <input id="changeInputDisabled1" aria-disabled="true" />
+      </label>
+    </div>
+    <div className="example-spacer--one">
+      <label>
+        Input will change to remove `aria-disabled`
+        <input id="changeInputDisabled2" aria-disabled="true" />
+      </label>
+    </div>
+    <button onClick={enableInputs} className="example-spacer--one">
+      Enable inputs
+    </button>
+  </Story>
+</Canvas>
+
+| Test case          | Result                                                                                                                                                                                                                                                                       |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| VoiceOver + Safari | Before enabling, both inputs read out the same as 'edit text', dimmed, and inputs; Rotor "form elements" had both inputs with dimmed listed; when enabled, both inputs read out the same and appeared the same in Rotor form elements                                        |
+| NVDA + Firefox     | Before enabling, both inputs read out the same: read labels, 'edit unavailable' inputs; on form fields, both have the same structure of [LABEL NAME]' edit, unavailable' before enabling inputs; When enabled, inputs have the same readout and same in the form fields list |
+| JAWS + Chrome      | Before enabling, both inputs read out the same as 'edit unavailable'; when enabled both inputs read out the same; both inputs appear the same in form fields and edit text lists when enabled and disabled                                                                   |
+| A11y tree          | Both have the same structure when enabled and disabled                                                                                                                                                                                                                       |
+| General navigation | Both inputs can be focused into enabled and disabled                                                                                                                                                                                                                         |

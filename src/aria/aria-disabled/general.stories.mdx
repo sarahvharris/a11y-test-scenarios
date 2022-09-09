@@ -1,0 +1,130 @@
+import { Canvas, Meta, Story } from '@storybook/addon-docs';
+
+<Meta title="ARIA/aria-disabled/General" />
+
+# General usage
+
+Test scenarios for general `disabled` and `aria-disabled` usage
+
+## Buttons
+
+Button elements are unique as they are part of forms but they are used in many other use cases aside from being submission elements.
+
+<Canvas>
+  <Story name="Buttons">
+    <button disabled>submit</button>
+    <button className="example-spacer--one" aria-disabled="true">
+      submit
+    </button>
+  </Story>
+</Canvas>
+
+| Test case          | Result                                                  |
+| ------------------ | ------------------------------------------------------- |
+| VoiceOver + Safari | TBD                                                     |
+| NVDA + Firefox     | TBD                                                     |
+| JAWS + Chrome      | TBD                                                     |
+| A11y tree          | `aria-disabled` button has `focusable=true` within tree |
+
+## Loading buttons
+
+Test case to see what attribute is better to use when a button is in a 'loading' state
+
+export const triggerLoadingButtons = () => {
+  const disabledButton = document.getElementById('loadingButton1');
+  const ariaDisabledButton = document.getElementById('loadingButton2');
+  disabledButton.setAttribute('disabled', true);
+  ariaDisabledButton.setAttribute('aria-disabled', true);
+  // replicating a "call" that would then enable the button again
+  setTimeout(() => {
+    disabledButton.removeAttribute('disabled');
+    ariaDisabledButton.removeAttribute('aria-disabled');
+  }, 3000);
+};
+
+<Canvas>
+  <Story name="Loading buttons">
+    <button id="loadingButton1" className="example-inset--one">
+      disabled loading button
+    </button>
+    <button id="loadingButton2">aria-disabled loading button</button>
+    <button onClick={triggerLoadingButtons} className="example-spacer--one">
+      enable loading button
+    </button>
+  </Story>
+</Canvas>
+
+| Test case          | Result                                                                                                                                              |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| VoiceOver + Safari | TBD                                                                                                                                                 |
+| NVDA + Firefox     | TBD                                                                                                                                                 |
+| JAWS + Chrome      | TBD                                                                                                                                                 |
+| A11y tree          | Before click, buttons are exactly same on tree; when `disabled`, the button's trees are the same expect `aria-disabled` button has `focusable=true` |
+
+## Using `disabled` and `aria-disabled`
+
+Adds both `disabled` and `aria-disabled="true"` to the elements below.
+
+`aria-disabled` is a subset of all the things `disabled` does. `disabled` will take precedence and make the form elements not focusable
+
+<Canvas>
+  <Story name="Using `disabled` and `aria-disabled`">
+    <div>
+      <button disabled="" aria-disabled="true">
+        submit
+      </button>
+    </div>
+    <div className="example-spacer--one">
+      <label>
+        Full name
+        <input disabled aria-disabled="true" placeholder="Enter name" />
+      </label>
+    </div>
+    <div className="example-spacer--one">
+      <fieldset>
+        <legend>select one option</legend>
+        <label>
+          <input
+            disabled
+            aria-disabled="true"
+            type="radio"
+            name="radioDisabledAriaDisabled"
+            value="1"
+          />
+          Some radio option
+        </label>
+      </fieldset>
+    </div>
+    <div className="example-spacer--one">
+      <fieldset>
+        <legend>select many options</legend>
+        <label>
+          <input
+            disabled
+            aria-disabled="true"
+            type="checkbox"
+            name="checkboxDisabledAriaDisabled"
+          />
+          Some checkbox option
+        </label>
+      </fieldset>
+    </div>
+    <div className="example-spacer--one">
+      <label>
+        Choose an option:
+        <select disabled aria-disabled="true">
+          <option value="">choose an option</option>
+          <option value="one">One</option>
+          <option value="two">Two</option>
+        </select>
+      </label>
+    </div>
+  </Story>
+</Canvas>
+
+| Test case          | Result                                                                                                                                                                                                                 |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| VoiceOver + Safari | TBD                                                                                                                                                                                                                    |
+| NVDA + Firefox     | TBD                                                                                                                                                                                                                    |
+| JAWS + Chrome      | TBD                                                                                                                                                                                                                    |
+| A11y tree          | The tree is the same for all elements when `disabled` OR `disabled` + `aria-disabled` are used; `aria-disabled` only will add an additional `focusable=true`; `disabled` will take precedence if `aria-disabled=false` |
